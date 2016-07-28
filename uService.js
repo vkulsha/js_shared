@@ -1563,11 +1563,27 @@ function getFieldHtml(fn, ft, def) {
 	return tr;
 }
 
+function i1(n, p){
+	if (n == "func1") {
+		console.log(p);
+		return 1
+	}
+	return 1;
+}
 
+function i2(n, p){
+	if (n == "func1") {
+		console.log(p);
+		return 1
+	}
+	return 1;
+}
 
-
-
-
+function func1(params) {
+	if (!i1("func1", params)) return;
+	console.log("func1 result...");
+	if (!i2("func1", params)) return;
+}
 
 
 
