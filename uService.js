@@ -1093,6 +1093,12 @@ function gDom(id){
 	return document.getElementById(id);
 }
 
+function cInp(type, innerHTML) {
+	var el = cDom("INPUT", innerHTML);
+	el.setAttribute("type", type);
+	return el;
+}
+
 function getMainInterfaceKey(userId){
 	var num = objectlink.gOrm("gT2",[["Пользователи","Интерфейсы","Ключи интерфейсов"],[[2,1]],[],0,["`Ключи интерфейсов`"],"and `id_Пользователи` = "+userId]);
 	num = getOrmObject({columns:["Ключи интерфейсов"],data:num},"col2array");
@@ -1563,27 +1569,173 @@ function getFieldHtml(fn, ft, def) {
 	return tr;
 }
 
-function i1(n, p){
-	if (n == "func1") {
-		console.log(p);
-		return 1
+///////////////
+
+class TDomValue {
+	constructor(dom, def, getValFunc){ 
+		this.getValFunc = getValFunc;
+		this._dom = dom;
+		this.value = def; 
+
+		var that = this;
+		this._dom.onchange = function() {
+			that.value = this.value;
+		}
+
 	}
-	return 1;
+	get value() { 
+		return this.getValFunc && typeof this.getValFunc == "function" ? this.getValFunc(this) : 
+			this.getValFunc ? this.getValFunc : 
+			this._dom.value;
+		
+	}
+	set value(val) { this._dom.value = val; }
+	get dom() { return this._dom; }
+	set dom(dom) { this._dom = dom; }
 }
 
-function i2(n, p){
-	if (n == "func1") {
-		console.log(p);
-		return 1
+class TLabel extends TDomValue {
+	constructor(def, getValFunc) { 
+		super(cDom("edit"), def, getValFunc); 
+		this.dom.setAttribute("readOnly", "true");
+		this.dom.style.backgroundColor = "transparent";
+		this.dom.style.border = "0px";
 	}
-	return 1;
 }
 
-function func1(params) {
-	if (!i1("func1", params)) return;
-	console.log("func1 result...");
-	if (!i2("func1", params)) return;
+class THidden extends TLabel {
+	constructor(def, getValFunc) { 
+		super(def, getValFunc);
+		this.dom.hidden = true;
+	}
 }
+
+class TEdit extends TDomValue {
+	constructor(def, getValFunc) { super(cInp("edit"), def, getValFunc); }
+}
+
+class TDate extends TDomValue {
+	constructor(def, getValFunc) { super(cInp("date"), def, getValFunc); }
+}
+
+class TMemo extends TDomValue {
+	constructor(def, getValFunc) { super(cDom("textarea"), def, getValFunc); }
+}
+
+class TCombo extends TDomValue {
+	constructor(def, values, getValFunc) {
+		super(cDom("select"), undefined, getValFunc);
+		this.fillSelectDom(this.dom, values || []);
+		this.value = def;
+	}
+
+	fillSelectDom(dom, values) {
+		dom.innerHTML = "";
+		dom.appendChild(cDom("OPTION"));
+		for (var i=0; i < values.length; i++){
+			var opt = cDom("OPTION");
+			opt.innerHTML = values[i][1];
+			opt.value = values[i][1];
+			opt.oid = values[i][0];
+			dom.appendChild(opt);
+		}
+	}
+	
+}
+
+class Container {
+	constructor(type, value, values, getValFunc) {
+		switch (type) {
+			case "edit":
+				this.cnt = new TEdit(value, getValFunc);
+			break;
+			case "date":
+				this.cnt = new TDate(value, getValFunc);
+			break;
+			case "memo":
+				this.cnt = new TMemo(value, getValFunc);
+			break;
+			case "combo":
+				this.cnt = new TCombo(value, values, getValFunc);
+			break;
+			case "label":
+				this.cnt = new TLabel(value, getValFunc);
+			break;
+			case "hidden":
+				this.cnt = new THidden(value, getValFunc);
+			break;
+			default:
+				this.cnt = new THidden(value, getValFunc);
+			break;
+			
+		}
+	}
+	
+	get value() {
+		return this.cnt.value;
+	}
+	
+	set value(val) {
+		return this.cnt.value = val;
+	}
+}
+
+class ContainerFactory {
+	constructor() {}
+	
+	create(type, value, values, getValFunc) {
+		return new Container(type, value, values, getValFunc);
+	}
+	
+}
+
+class Objects {
+	constructor(oid, cid, parentObject, container, def) {
+		var cf = new ContainerFactory();
+		this.oid = oid;
+		this.cid = cid;
+		this.parentObject = parentObject;
+		this.cnt = container && container instanceof TDomValue ? container : cf.create("hidden", def);
+		this.value = def;
+	}
+	
+	get value() {
+		var val;
+		if (this.oid)
+			val = objectlink.gOrm("gO", this.oid);
+		if (val)
+			this.value = val;
+		return this.cnt.value;
+	}
+	
+	set value(val) {
+		this.cnt.value = val;
+	}
+	
+	get pid() {
+		if (parentObject && parentObject instanceof Objects)
+			return parentObject.oid;
+	}
+	
+	save() {
+		var obj = objectlink.gOrm("getObjectFromClass", this.cid, this.value);
+		if (obj && obj.length) {
+			this.oid = obj[0][0];
+		} else {
+			if (cid)
+				this.oid = objectlink.gOrm("cO", [this.value, cid]);
+			if (this.pid)
+				objectlink.gOrm("cL", [this.oid, this.pid]);
+		}
+	}
+	
+}
+
+
+
+
+
+
 
 
 
