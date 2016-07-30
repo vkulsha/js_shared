@@ -7,7 +7,6 @@
 
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 		
-		<link rel="stylesheet" type="text/css" href="css/main.css">
 		<link rel="stylesheet" type="text/css" href="css/jsTable.css">
 
 		<script src="js/jquery-2.2.0.min.js"></script>

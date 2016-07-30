@@ -3,7 +3,6 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 		<meta http-equiv="Cache-Control" content="no-cache" />
 		
-		<link rel="stylesheet" type="text/css" href="css/main.css">
 		<link rel="stylesheet" type="text/css" href="css/jsTable.css">
 
 		<script src="js/jquery-2.2.0.min.js"></script>
@@ -24,6 +23,7 @@
 ////////////////modal
 		var modal = document.getElementById('myModal');
 		var span = document.getElementsByClassName("close")[0];
+		var divData = gDom("divData");
 
 		span.onclick = function() {
 			modal.style.display = "none";
@@ -64,13 +64,34 @@
 		window.onhashchange = function(){
 			hashchange();
 		}
-
+/*		
 		var oid = $_GET("oid", "#", location.hash);
 		hashchange();
 		
 		function hashchange(){
 			oid = $_GET("oid", "#", location.hash);// || "115";
 		}
+*/
+		var cntf = new ContainerFactory();
+		var div = divData.appendChild(cDom("DIV"));
+		var zdp, zdz;
+		var zakaz = new Objects(classes["Заказы ПИР"], null, cntf.create("hidden", div, "", null, function(that){
+			return "Заказ "+(zdp.value || d2str(new Date()))
+		}));
+		
+		zdp = new Objects(classes["Заказы дата подписания"], null, cntf.create("date", div), zakaz);
+		zdz = new Objects(classes["Заказы дата закрытия"], null, cntf.create("date", div), zakaz);
+		
+		var arr = [zakaz, zdp, zdz];
+		var but = cDom("BUTTON", null, div);
+		but.innerHTML = "save";
+		but.onclick = function() {
+			for (var i=0; i < arr.length; i++) {
+				arr[i].save();
+				console.log(arr[i].oid);
+			}
+		}
+		
 		
 	})
 </script>
