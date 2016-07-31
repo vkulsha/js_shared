@@ -72,26 +72,43 @@
 			oid = $_GET("oid", "#", location.hash);// || "115";
 		}
 */
-		var cntf = new ContainerFactory();
+/*
+		var cntf = new TContainerFactory();
 		var div = divData.appendChild(cDom("DIV"));
-		var zdp, zdz;
-		var zakaz = new Objects(classes["Заказы ПИР"], null, cntf.create("hidden", div, "", null, function(that){
-			return "Заказ "+(zdp.value || d2str(new Date()))
-		}));
+		var zdp, zdz, zds;
+		var cnt = cntf.create("hidden", div, "", null, function(that){
+			return "Заказ "+that.iii;//(zdp.value || d2str(new Date()))
+		});
+		var zakaz = new TField(classes["Заказы ПИР"], null, cnt);
 		
-		zdp = new Objects(classes["Заказы дата подписания"], null, cntf.create("date", div), zakaz);
-		zdz = new Objects(classes["Заказы дата закрытия"], null, cntf.create("date", div), zakaz);
+		zdp = new TField(classes["Заказы дата подписания"], null, cntf.create("date", div), zakaz);
+		zdz = new TField(classes["Заказы дата закрытия"], null, cntf.create("date", div), zakaz);
+		zds = new TField(classes["Заказы статус"], null, cntf.create("checkbox", div), zakaz, "123");
 		
 		var arr = [zakaz, zdp, zdz];
 		var but = cDom("BUTTON", null, div);
 		but.innerHTML = "save";
 		but.onclick = function() {
-			for (var i=0; i < arr.length; i++) {
-				arr[i].save();
-				console.log(arr[i].oid);
-			}
+			//console.log(zds.value);
+			//cnt.cnt.iii = 123;
+			//console.log(zakaz.value);
+			//for (var i=0; i < arr.length; i++) {
+			//	arr[i].save();
+			//	console.log(arr[i].oid);
+			//}
 		}
+*/
+		var card1 = createFieldsCard(
+			["Заказы ПИР","Заказы дата подписания","Заказы дата закрытия","Заказы статус"],
+			["hidden","date","date","checkbox"], ["Заказ ", 1], null, null, true);
+		divData.appendChild(card1);
 		
+		var ch = new TCheckboxes(["2 соава","3"],["1","2 соава","3","4"], null, divData);
+		var but = cDom("BUTTON", null, divData);
+		but.innerHTML = "save";
+		but.onclick = function() {
+			console.log(ch.checked);
+		}
 		
 	})
 </script>
