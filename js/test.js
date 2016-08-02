@@ -16,7 +16,7 @@ QUnit.test( "essp test", function( a ) {
 	a.ok( new TCombo("2", [[1,1],[2,2]]).dom.type == "select-one", "TCombo 2" );
 	a.ok( new TCombo("2", [[1,1],[2,2]]).dom.getElementsByTagName("option").length == 3, "TCombo 3" );
 	
-	var cntf = new ContainerFactory();
+	var cntf = new TContainerFactory();
 	a.ok( cntf.create("combo", null, "2", [[1,1],[2,2]]).value == "2", "ContainerFactory combo" );
 	
 	
