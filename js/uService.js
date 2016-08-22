@@ -1930,8 +1930,71 @@ function createFieldsCard(fields, fieldsT, mainFieldValLinkedFieldNums, mainObjI
 	
 }
 
-
-
+class TForm {
+	constructor(parentDom, width, height, left, top, zIndex, visible) {
+		this.dom_ = cDom("DIV");
+		if (parentDom) parentDom.appendChild(this.dom_);
+		this.dom_.style.display = visible ? "block" : "none";
+		this.dom_.style.position = "fixed";
+		this.dom_.style.zIndex = zIndex || 100;
+		this.dom_.style.left = 0;
+		this.dom_.style.top = 0;
+		this.dom_.style.width = "100%";
+		this.dom_.style.height = "100%";
+		this.dom_.style.overflow = "hidden";
+		this.dom_.style.backgroundColor = "rgba(255,255,255,0.8)";
+		
+		this.body_ = this.dom_.appendChild(cDom("DIV"));
+		this.body_.style.position = "relative";
+		this.body_.style.backgroundColor = "#fff";
+		this.body_.style.margin = "auto";
+		this.body_.style.padding = 0;
+		this.body_.style.left = left || 0;
+		this.body_.style.top = top || 0;
+		this.body_.style.width = width || "90%";
+		this.body_.style.height = height || this.body_.style.height;
+		this.body_.style.boxShadow = "0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19)";
+		//this.body_.style.animationName = "animatetop"; ///animate off
+		//this.body_.style.animationDuration = "0.8s"; 	 ///animate off
+	}
+	
+	set visible(val) {
+		this.dom.style.display = val ? "block" : "none";
+	}
+	
+	get dom() {
+		return this.dom_;
+	}
+	
+	get body() {
+		return this.body_;
+	}
+	
+	set body(val) {
+		$(this.body_).append(val);
+	}
+	
+	set width(val) {
+		this.body.style.width = val;
+	}
+	
+	set height(val) {
+		this.body.style.height = val;
+	}
+	
+	set top(val) {
+		this.body.style.top = val;
+	}
+	
+	set left(val) {
+		this.body.style.left = val;
+	}
+	
+	set zIndex(val) {
+		this.dom.style.zIndex = val;
+	}
+	
+}
 
 
 
