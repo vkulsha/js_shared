@@ -2117,9 +2117,23 @@ class TForm {
 	
 }
 
+function innerTrim(str) {//10K=16ms !!!without defects full clean with first and last spaces
+	var s = "";
+	var c = "";
 
-
-
-
-
+	for (var i=0; i < str.length; i++) {
+		var isSpace = (str[i] == String.fromCharCode(32) || str[i] == String.fromCharCode(9));
+		
+		if (isSpace) {
+			c = " ";
+			if (!s) c = "";
+		} else {
+			c += str[i];
+			s += c;
+			c = "";
+		}
+	}
+	
+	return s;
+}
 
