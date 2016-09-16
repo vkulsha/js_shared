@@ -1304,8 +1304,10 @@ function createObjectDocFile() {
 	var svid = objectlink.gOrm("gT2",[["Правоустанавливающие документы","Файлы"],[],[],0,null,"and `id_Файлы` is null"]);
 	for (var i = 0; i < svid.length; i++) {
 		var svidId = svid[i][0];
-		if (svidId)
+		if (svidId) {
 			objectlink.gOrm("cL", [svidFileTestId, svidId]);
+			console.log(i);
+		}
 	} 
 	
 }
