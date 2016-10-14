@@ -1156,7 +1156,7 @@ function $_GET(keyname, delimiter, uri){
 ///get coord from SAS format from SQL ttt and create Polygon object class
 function coordsFromSas(){
 	var ret = [];
-	var coords = orm("select f1 from ttt where f1 like 'Point%'", "col2array");
+	var coords = orm("select f1 from ttt", "col2array");
 	for (var i=0; i < coords.length; i=i+2){
 		var lon = coords[i].split("=")[1];
 		var lat = coords[i+1].split("=")[1];
@@ -1207,110 +1207,16 @@ function createPolygonFromKml(uri, oid){
 }
 ////////////
 
-function createObjectsFromTable(cid, pid, fieldname, tablename){
+function createObjectsFromTable(fieldname, tablename, cid){
 	var ret = [];
-	fieldname = fieldname || "f1";
-	tablename = tablename || "ttt";
-	var vals = orm("select "+fieldname+" from "+tablename, "col2array");
-	var c1 = orm("select distinct o1 from link where o2 = 1425", "col2array");
+	var vals = orm("select f1 from ttt", "col2array");
 	for (var i=0; i < vals.length; i++){
-		var val = innerTrim(vals[i]).trim();
-		var oid = objectlink.gOrm("cO", [val, cid]);
-		if (pid && oid) objectlink.gOrm("cL", [oid, pid]);
+		var val = vals[i];
+		objectlink.gOrm("cO", [val, cid]);
 	}
-	var c2 = orm("select distinct o1 from link where o2 = 1425", "col2array");
-	return vals.length + " (" + (c2.length-c1.length) + ")";
+	return vals.length;
 
 };
-
-function createObjectsFromTable1(){
-	var zd1 = orm("select f1,f2,f3,f4,f5,f6,f7,f8,f9,f10 from ttt", "all2array");
-	var objectid = zd1[0][9];
-	
-	var zd2 = objectlink.gOrm("gT2",[["Объект","Здания и сооружения","Адрес"],[],[],false,null,"and `id_Объект`="+objectid]);
-	var addrId = zd2[0][4];
-	var	subjPravoId = objectlink.gOrm("gO", ["АО \"ГУОВ\"", null, null, classes["Субъект права"]]);
-	var	vidPravoId = objectlink.gOrm("gO", ["Собственность", null, null, classes["Вид права"]]);
-	
-	var count = 0;
-	for (var i=0; i < zd1.length; i++) {
-		var val1 = innerTrim(zd1[i][0]).trim();
-		var val2 = innerTrim(zd2[i][3]).trim();
-		if (val1 == val2) {
-			count++;
-			var zdid = zd2[i][2];
-
-			if (zdid) {
-				var egrpNum = zd1[i][8];
-				if (egrpNum) {
-					var svidId = objectlink.gOrm("cO", ["Правоустанавливающие документы "+zdid+"("+val1+")", classes["Правоустанавливающие документы"]]);
-					if (svidId) {
-						//objectlink.gOrm("cL", [zdid, classes["Объект права"]]);
-						objectlink.gOrm("cL", [svidId, zdid]);
-						//objectlink.gOrm("cL", [zdid, svidId]);
-						
-						if (addrId) objectlink.gOrm("cL", [addrId, svidId]);
-						objectlink.gOrm("cL", [subjPravoId, svidId]);
-						objectlink.gOrm("cL", [vidPravoId, svidId]);
-						var egrpNumId = objectlink.gOrm("cO", [egrpNum, classes["Номер записи регистрации в ЕГРП"]]);
-						if (egrpNumId) objectlink.gOrm("cL", [egrpNumId, svidId]);
-					}
-				}
-				
-				var square = zd1[i][1] || "";
-				if (square) square = square.replace(new RegExp(",",'g'),".");
-				var floorsCount = zd1[i][2];
-				var year = zd1[i][3];
-				
-				if (square || floorsCount || year) {
-					var techId = objectlink.gOrm("cO", ["Технические данные "+zdid+"("+val1+")", classes["Технические данные"]]);
-					if (techId) {
-						objectlink.gOrm("cL", [techId, zdid]);
-						if (square) {
-							var squareId = objectlink.gOrm("cO", [square, classes["Общая площадь"]]);
-							if (squareId) objectlink.gOrm("cL", [squareId, techId]);
-						}
-						if (floorsCount) {
-							var floorsCountId = objectlink.gOrm("cO", [floorsCount, classes["Число этажей"]]);
-							if (floorsCountId) objectlink.gOrm("cL", [floorsCountId, techId]);
-						}
-						if (year) {
-							var yearId = objectlink.gOrm("cO", [year, classes["Год постройки"]]);
-							if (yearId) objectlink.gOrm("cL", [yearId, techId]);
-						}
-						
-					}
-				}
-			}
-		}
-		console.log(val1);
-	}
-	return zd1.length + " " + zd2.length + " " + count;
-};
-
-function createObjectDocFile() {
-	var techFileTestId = 11349;
-	var svidFileTestId = 11350;
-
-	var tech = objectlink.gOrm("gT2",[["Технические данные","Файлы"],[],[],0,null,"and `id_Файлы` is null"]);
-	for (var i = 0; i < tech.length; i++) {
-		var techId = tech[i][0];
-		if (techId) {
-			objectlink.gOrm("cL", [techFileTestId, techId]);
-			console.log(i);
-		}
-	} 
-	
-	var svid = objectlink.gOrm("gT2",[["Правоустанавливающие документы","Файлы"],[],[],0,null,"and `id_Файлы` is null"]);
-	for (var i = 0; i < svid.length; i++) {
-		var svidId = svid[i][0];
-		if (svidId) {
-			objectlink.gOrm("cL", [svidFileTestId, svidId]);
-			console.log(i);
-		}
-	} 
-	
-}
 
 function createObjectsFromObjectDir(oid){
 	var objectPath = "data/"+oid+"/";
@@ -1507,9 +1413,13 @@ function fillSelectDom2(dom, values) {
 	}
 }
 
-
 function d2str(d) {
 	var dt = d.getFullYear() + ("0"+(d.getMonth()+1)).slice(-2) + ("0" + d.getDate()).slice(-2) + ("0" + d.getHours()).slice(-2) + ("0" + d.getMinutes()).slice(-2) + ("0" + d.getSeconds()).slice(-2);
+	return dt
+}
+
+function d2str2(d) {
+	var dt = ("0" + d.getDate()).slice(-2) + "." + ("0"+(d.getMonth()+1)).slice(-2) + "." + d.getFullYear();
 	return dt
 }
 
@@ -1733,7 +1643,20 @@ class TEdit extends TDomValue {
 }
 
 class TDate extends TDomValue {
-	constructor(def, getValFunc, parentDom) { super(cInp("date", null, parentDom), def, getValFunc); }
+	constructor(def, getValFunc, parentDom) { 
+		if (getBrowser() == "Firefox" || getBrowser() == "IE") {
+			super(cInp("text", null, parentDom), def, getValFunc); 
+			$(this.dom).datepicker($.extend({
+                inline: true,
+                changeYear: true,
+                changeMonth: true,
+				}, $.datepicker.regional['ru']
+			));
+			
+		} else {
+			super(cInp("date", null, parentDom), def, getValFunc); 
+		}
+	}
 }
 
 class TMemo extends TDomValue {
@@ -2210,55 +2133,6 @@ class TForm {
 	}
 	
 }
-
-function innerTrim(str) {//10K=16ms !!!without defects full clean with first and last spaces
-	var s = "";
-	var c = "";
-
-	for (var i=0; i < str.length; i++) {
-		var isSpace = (str[i] == String.fromCharCode(32) || str[i] == String.fromCharCode(9));
-		
-		if (isSpace) {
-			c = " ";
-			if (!s) c = "";
-		} else {
-			c += str[i];
-			s += c;
-			c = "";
-		}
-	}
-	
-	return s;
-}
-
-function test() {/*
-//	var arr = objectlink.gOrm("gT2",[["Объект", "Здания и сооружения", "Правоустанавливающие документы", "Файлы"],[[2,1],[3,2]],[],false, undefined, "and `id_Объект` = 1223"]);	
-	var arr = objectlink.gOrm("gT2",[["Объект", "Здания и сооружения", "Технические данные", "Файлы"],[[2,1],[3,2]],[],false, undefined, "and `id_Объект` = 1223"]);	
-
-//	var oo = 12480;
-	var oo = 11349;
-		
-	for (var i=0; i < arr.length; i++) {
-		var o1 = arr[i][4];
-		var o2 = arr[i][6];
-		
-		if (o1 && o2 && oo) {
-			objectlink.gOrm("eL", [oo, o1]);
-			//objectlink.gOrm("cL", [oo, o1]);
-			console.log(arr[i][3]);
-		}
-	}
-	*/
-	return true;
-}
-
-
-
-
-
-
-
-
 
 
 
